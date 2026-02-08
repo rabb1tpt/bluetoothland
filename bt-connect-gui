@@ -1,0 +1,55 @@
+#!/bin/bash
+# Bluetooth connection script with wofi GUI
+
+# Ensure Bluetooth is powered on
+bluetoothctl power on &>/dev/null
+
+# Get paired devices with connection status
+devices=$(bluetoothctl devices Paired | while read -r _ mac name; do
+    if bluetoothctl info "$mac" | grep -q "Connected: yes"; then
+        echo "✓ $name|$mac"
+    else
+        echo "  $name|$mac"
+    fi
+done)
+
+if [ -z "$devices" ]; then
+    notify-send "Bluetooth" "No paired devices found"
+    exit 1
+fi
+
+# Show menu with wofi
+selected=$(echo "$devices" | wofi --dmenu --prompt "Bluetooth" --height 300 --width 400)
+
+if [ -z "$selected" ]; then
+    exit 0
+fi
+
+# Extract MAC address
+mac=$(echo "$selected" | cut -d '|' -f 2)
+name=$(echo "$selected" | cut -d '|' -f 1 | sed 's/^[✓ ]*//')
+
+# Toggle connection
+if bluetoothctl info "$mac" | grep -q "Connected: yes"; then
+    bluetoothctl disconnect "$mac"
+    notify-send "Bluetooth" "Disconnected from $name"
+else
+    # Power on adapter
+    bluetoothctl power on &>/dev/null
+    sleep 0.5
+
+    # Disconnect all other audio devices first
+    for dev in $(bluetoothctl devices Paired | awk '{print $2}'); do
+        if bluetoothctl info "$dev" | grep -q "Connected: yes"; then
+            bluetoothctl disconnect "$dev" &>/dev/null
+            sleep 0.3
+        fi
+    done
+
+    # Connect to selected device
+    if bluetoothctl connect "$mac" &>/dev/null; then
+        notify-send "Bluetooth" "Connected to $name"
+    else
+        notify-send "Bluetooth" "Failed to connect to $name"
+    fi
+fi

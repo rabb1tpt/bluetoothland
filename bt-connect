@@ -1,0 +1,81 @@
+#!/bin/bash
+# Simple Bluetooth device connection script
+
+# Get list of paired devices
+paired_devices=$(bluetoothctl devices Paired | cut -d ' ' -f 2,3-)
+
+if [ -z "$paired_devices" ]; then
+    echo "No paired devices found."
+    echo "Use 'bluetoothctl' to pair new devices first."
+    exit 1
+fi
+
+# If running in terminal (interactive mode)
+if [ -t 0 ]; then
+    echo "=== Paired Bluetooth Devices ==="
+    echo ""
+
+    i=1
+    declare -A device_map
+    while IFS= read -r line; do
+        mac=$(echo "$line" | awk '{print $1}')
+        name=$(echo "$line" | cut -d ' ' -f 2-)
+
+        # Check if connected
+        if bluetoothctl info "$mac" | grep -q "Connected: yes"; then
+            status="[CONNECTED]"
+        else
+            status="[disconnected]"
+        fi
+
+        echo "$i) $name $status"
+        device_map[$i]="$mac"
+        ((i++))
+    done <<< "$paired_devices"
+
+    echo ""
+    echo "0) Scan for new devices"
+    echo "q) Quit"
+    echo ""
+    read -p "Select device number: " choice
+
+    if [ "$choice" = "q" ]; then
+        exit 0
+    elif [ "$choice" = "0" ]; then
+        echo "Starting scan... (Ctrl+C to stop)"
+        bluetoothctl scan on
+        exit 0
+    fi
+
+    selected_mac="${device_map[$choice]}"
+
+    if [ -z "$selected_mac" ]; then
+        echo "Invalid selection"
+        exit 1
+    fi
+
+    # Check if already connected
+    if bluetoothctl info "$selected_mac" | grep -q "Connected: yes"; then
+        echo "Disconnecting..."
+        bluetoothctl disconnect "$selected_mac"
+    else
+        echo "Connecting..."
+        bluetoothctl connect "$selected_mac"
+    fi
+
+    sleep 1
+
+else
+    # Non-interactive mode (for wofi/rofi)
+    # Output device list in format: "Device Name (MAC)"
+    while IFS= read -r line; do
+        mac=$(echo "$line" | awk '{print $1}')
+        name=$(echo "$line" | cut -d ' ' -f 2-)
+
+        if bluetoothctl info "$mac" | grep -q "Connected: yes"; then
+            echo "✓ $name"
+        else
+            echo "  $name"
+        fi
+    done <<< "$paired_devices"
+fi
