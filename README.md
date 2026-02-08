@@ -130,7 +130,6 @@ A nod to **Hyprland** and **Wayland** - the modern compositor ecosystem this too
 
 PRs welcome! This tool is intentionally simple and focused. Ideas for improvements:
 
-- [ ] Add support for `rofi` as an alternative to `wofi`
 - [ ] Battery level indicators for connected devices
 - [ ] Quick toggle for last-connected device
 - [ ] Integration examples for other status bars (polybar, eww)
@@ -141,6 +140,6 @@ MIT - Feel free to use, modify, and share!
 
 ## Credits
 
-Created by [Your Name] for the Hyprland community.
+Created by Bruno and Claude Sonnet 4.5 for the Hyprland community.
 
-Built with ❤️ and frustration at complicated Bluetooth managers.
+Built with ❤️  and frustration at complicated Bluetooth managers.
