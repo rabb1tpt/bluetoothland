@@ -22,12 +22,12 @@ bluetoothland provides two simple scripts:
 
 ### Features
 
-✅ Minimal dependencies (just `bluetoothctl` and optionally `wofi`)
-✅ Auto-disconnect other devices when connecting (no conflicts)
-✅ Shows connection status with visual indicators
-✅ Integrates seamlessly with Waybar or any status bar
-✅ Works on any Wayland compositor
-✅ Zero configuration needed
+- ✅ Minimal dependencies (just `bluetoothctl` and optionally `wofi`)
+- ✅ Auto-disconnect other devices when connecting (no conflicts)
+- ✅ Shows connection status with visual indicators
+- ✅ Integrates seamlessly with Waybar or any status bar
+- ✅ Works on any Wayland compositor
+- ✅ Zero configuration needed
 
 ## Installation
 
